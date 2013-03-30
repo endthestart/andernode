@@ -6,8 +6,7 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^$', 'andernode.views.home', name='home'),
-    url(r'^manage/', include('kvm.urls')),
+    url(r'$', 'kvm.views.home', name='manage_home'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

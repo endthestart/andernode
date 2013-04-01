@@ -4,6 +4,17 @@
     <title></title>
 </head>
 <body>
-
+<div class="headmast">
+    {% if user.is_authenticated %}
+        Welcome, {{ user.first_name }}
+    {% else %}
+        <a href="{% url 'custom_auth.views.login' %}" name="login">Login</a>
+    {% endif %}
+    <a href="{% url 'custom_auth.views.logout' %}" name="logout">Logout</a>
+</div>
+<div class="body">
+    {% block body %}
+    {% endblock %}
+</div>
 </body>
 </html>

@@ -15,7 +15,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'kvm',                      # Or path to database file if using sqlite3.
+        'NAME': 'kvm.db',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -38,7 +38,7 @@ TIME_ZONE = 'America/Chicago'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-SITE_ID = 1
+#SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -102,6 +102,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'utils.middleware.LoginRequiredMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -122,15 +123,14 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    #'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    #'django.contrib.admindocs',
     'andernode',
-    'auser',
+    'custom_auth',
     'kvm',
 )
 
@@ -162,3 +162,9 @@ LOGGING = {
         },
     }
 }
+
+AUTHENTICATION_BACKENDS = ('custom_auth.auth.Authenticate',)
+LOGIN_REQUIRED_URLS = (
+    r'/manage/(.*)$',
+)
+AUTH_USER_MODEL = 'custom_auth.User'

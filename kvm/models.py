@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-# Create your models here.
+
 class Distribution(models.Model):
     ARCH_CHOICES = (
         ('32', '32-bit'),
@@ -44,6 +44,7 @@ class VirtualMachine(models.Model):
         Distribution,
     )
 
+
 class Disk(models.Model):
     FS_CHOICES = (
         ("ext3", _("ext3")),
@@ -67,6 +68,7 @@ class Disk(models.Model):
         choices=FS_CHOICES,
         help_text=_("The filesystem of the disk."),
     )
+
 
 class VirtualMachineDisk(models.Model):
     BLOCK_CHOICES = (

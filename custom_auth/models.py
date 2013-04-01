@@ -22,7 +22,6 @@ class UserManager(BaseUserManager):
             last_name=last_name,
             is_staff=False,
             is_active=True,
-            is_superuser=False,
             last_login=now,
             date_joined=now,
             **extra_fields
@@ -45,6 +44,7 @@ class User(AbstractBaseUser):
     email = models.EmailField(
         _('email address'),
         db_index=True,
+        unique=True,
     )
     first_name = models.CharField(
         _("first name"),
@@ -57,12 +57,21 @@ class User(AbstractBaseUser):
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
-        help_text=_('Designates whether the user can log into this admin site.')
+        help_text=_('Designates whether the user can log into this admin site.'),
     )
     is_active = models.BooleanField(
         _('active'),
         default=True,
         help_text=_('Designates whether this user should be treated as active. Unselect this instead of deleting accounts.')
+    )
+    is_admin = models.BooleanField(
+        _('admin'),
+        default=False,
+        help_text=_('Designates wheter this user should be treated as an admin'),
+    )
+    date_joined = models.DateTimeField(
+        _('date joined'),
+        default=timezone.now,
     )
 
     USERNAME_FIELD = 'email'
@@ -73,7 +82,6 @@ class User(AbstractBaseUser):
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')
-        abstract = True
 
     def get_absolute_url(self):
         return "/users/%s/" % urlquote(self.username)
@@ -94,3 +102,9 @@ class User(AbstractBaseUser):
         Sends an email to this User.
         """
         send_mail(subject, message, from_email, [self.email])
+
+    def has_perm(self, perm, obj=None):
+        return True
+
+    def has_module_perms(self, app_label):
+        return True

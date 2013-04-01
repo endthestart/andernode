@@ -33,9 +33,7 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, email, first_name, last_name, password, **extra_fields):
         u = self.create_user(email, first_name, last_name, password, **extra_fields)
-        u.is_staff = True
-        u.is_active = True
-        u.is_superuser = True
+        u.is_admin = True
         u.save(using=self._db)
         return u
 
@@ -54,11 +52,6 @@ class User(AbstractBaseUser):
         _("last name"),
         max_length=255,
     )
-    is_staff = models.BooleanField(
-        _('staff status'),
-        default=False,
-        help_text=_('Designates whether the user can log into this admin site.'),
-    )
     is_active = models.BooleanField(
         _('active'),
         default=True,
@@ -67,7 +60,7 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(
         _('admin'),
         default=False,
-        help_text=_('Designates wheter this user should be treated as an admin'),
+        help_text=_('Designates whether this user should be treated as an admin.'),
     )
     date_joined = models.DateTimeField(
         _('date joined'),
@@ -85,6 +78,14 @@ class User(AbstractBaseUser):
 
     def get_absolute_url(self):
         return "/users/%s/" % urlquote(self.username)
+
+    @property
+    def is_staff(self):
+        return self.is_admin
+
+    @property
+    def is_superuser(self):
+        return self.is_admin
 
     def get_full_name(self):
         """

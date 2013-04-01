@@ -39,7 +39,7 @@ class LoginForm(forms.Form):
     username/password logins.
     """
     email = forms.EmailField(label=_("Email"))
-    password = forms.CharField(label=_("Password "), widget=forms.PasswordInput)
+    password = forms.CharField(label=_("Password"), widget=forms.PasswordInput)
     user = None
 
     error_messages = {
@@ -55,8 +55,7 @@ class LoginForm(forms.Form):
         password = self.cleaned_data.get('password')
 
         if email and password:
-            print(self.data['password'])
-            user = authenticate(email=self.data['email'],
+            user = authenticate(username=self.data['email'],
                                 password=self.data['password'])
             if user is not None:
                 if user.is_active:

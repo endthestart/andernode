@@ -2,10 +2,9 @@ from .models import User
 
 
 class Authenticate(object):
-
-    def authenticate(self, email=None, password=None):
+    def authenticate(self, username=None, password=None):
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(email=username)
             if user.check_password(password):
                 return user
         except User.DoesNotExist:

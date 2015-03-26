@@ -1,0 +1,11 @@
+---
+- name: Provision a CentOS server
+  hosts: local
+  sudo: yes
+  sudo_user: root
+  remote_user: root
+  vars:
+    - some_var: yes
+    - other_var: no
+  roles:
+    - centos7

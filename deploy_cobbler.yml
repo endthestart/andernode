@@ -1,0 +1,8 @@
+---
+- name: Provision a Cobbler server
+  hosts: cobbler
+  sudo: yes
+  sudo_user: root
+  remote_user: root
+  roles:
+    - cobbler

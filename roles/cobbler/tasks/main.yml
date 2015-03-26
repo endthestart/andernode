@@ -1,0 +1,39 @@
+---
+
+- name: Configure epel repo (yum)
+  template: src=epel.repo.j2 dest=/etc/yum.repos.d/epel.repo owner=root group=root mode=0644
+
+- name: Install Cobbler dependencies
+  yum: name={{ item }} state=present
+  with_items:
+    - xinetd
+    - dhcp
+
+- name: Configure dhcpd
+  template: src=dhcpd.j2 dest=/etc/sysconfig/dhcpd
+
+- name: Enable dhcpd
+  service: name=dhcpd state=stopped enabled=true
+
+- name: Check if firewalld is installed
+  sudo: yes
+  command: which firewalld
+  register: firewalld
+  changed_when: false
+  ignore_errors: true
+
+- name: Check if firewalld service is running
+  sudo: yes
+  command: firewall-cmd --state
+  register: firealld_svc
+
+
+- name: Install prereqs for SELinux administration
+  yum: name=libselinux-python state=latest update_cache=true
+
+- name: Set SELinux to permissive
+  selinux: policy=targeted state=permissive
+
+- name: Install Cobbler package
+  yum: name=cobbler state=latest update_cache=true
+  tags: packages

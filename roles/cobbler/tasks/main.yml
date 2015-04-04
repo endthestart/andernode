@@ -1,5 +1,7 @@
 ---
 
+# Repository and Prerequisites
+
 - name: Configure epel repo (yum)
   template: src=epel.repo.j2 dest=/etc/yum.repos.d/epel.repo owner=root group=root mode=0644
 
@@ -9,11 +11,15 @@
     - xinetd
     - dhcp
 
+# DHCP Server Configuration
+
 - name: Configure dhcpd
   template: src=dhcpd.j2 dest=/etc/sysconfig/dhcpd
 
 - name: Enable dhcpd
   service: name=dhcpd state=stopped enabled=true
+
+# Firewall Configuration
 
 - name: Check if firewalld is installed
   sudo: yes
@@ -25,8 +31,23 @@
 - name: Check if firewalld service is running
   sudo: yes
   command: firewall-cmd --state
-  register: firealld_svc
+  register: firewalld_svc
+  ignore_errors: true
+  when: firewalld|success
 
+- name: Enable Cobbler tftpd through firewalld
+  sudo: yes
+  firewalld: service=tftp permanent=true state=enabled
+  notify: restart firewalld
+  when: firewalld|success and firewalld_svc.stdout=='running'
+
+- name: Enable Cobbler httpd through firewalld
+  sudo: yes
+  firewalld: service=http permanent=true state=enabled
+  notify: restart firewalld
+  when: firewalld|success and firewalld_svc.stdout=='running'
+
+# Configure SELinux settings to be permissive
 
 - name: Install prereqs for SELinux administration
   yum: name=libselinux-python state=latest update_cache=true
@@ -34,6 +55,56 @@
 - name: Set SELinux to permissive
   selinux: policy=targeted state=permissive
 
+# Install Cobbler
+
 - name: Install Cobbler package
   yum: name=cobbler state=latest update_cache=true
   tags: packages
+
+- name: Start and enable apache2
+  service: name=httpd state=started enabled=true
+
+- name: Configure xinetd rsync
+  copy: src=rsync dest=/etc/xinetd.d/ owner=root group=root mode=0644
+  notify: restart xinetd
+
+- name: Start and enable xinetd
+  service: name=xinetd state=started enabled=true
+
+- name: Configure Cobbler
+  template: src=cobbler_settings.j2 dest=/etc/cobbler/settings
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
+
+- name: Start and enable Cobbler
+  service: name=cobblerd state=started enabled=true
+
+- name: Get Cobbler loaders
+  command: cobbler get-loaders
+  args:
+    creates: /var/lib/cobbler/loaders/README
+  when: cobbler_get_loaders
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
+
+- name: Update Cobbler signatures
+  command: cobbler signature update
+  when: cobbler_signature_update
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
+
+- name: Configure Cobbler DHCP
+  template: src=dhcp.template.j2 dest=/etc/cobbler/dhcp.template
+  notify:
+    - restart cobbler
+    - wait for cobbler
+    - sync cobbler
+
+- name: Add default Ubuntu preseed
+  template: src=ubuntu-server.preseed.j2 dest=/etc/cobbler/ubuntu-server.preseed

@@ -4,5 +4,7 @@
   sudo: yes
   sudo_user: root
   remote_user: root
+  vars_files:
+    - env_vars/main.yml
   roles:
     - cobbler
